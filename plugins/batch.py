@@ -3,14 +3,13 @@ from pyrogram.types import Message
 import re
 import asyncio
 import config
+import random  # Importing random module
 from app import LOGGER
 from utils.telegram_logger import send_info, send_error, send_warning
 from plugins.video_message import message_queue, worker_task, process_video_queue
 from asyncio import create_task
 
-
 TELEGRAM_LINK_PATTERN = r"https://t\.me/(?:c/)?([^/]+)/(\d+)"
-
 
 @Client.on_message(filters.command("batch") & filters.user(config.SUDO_USERS))
 async def batch_process(client: Client, message: Message):
@@ -19,7 +18,6 @@ async def batch_process(client: Client, message: Message):
     Usage: /batch https://t.me/c/123456789/123 https://t.me/c/123456789/456
     """
     try:
-
         if len(message.command) < 3:
             await message.reply_text(
                 "⚠️ Please provide both start and end Telegram message links.\n"
@@ -49,7 +47,6 @@ async def batch_process(client: Client, message: Message):
         if start_chat_identifier.isdigit():
             chat_id = int(f"-100{start_chat_identifier}")
         else:
-
             chat_id = start_chat_identifier
 
         end_match = re.match(TELEGRAM_LINK_PATTERN, end_link)
@@ -91,12 +88,10 @@ async def batch_process(client: Client, message: Message):
 
         while current_msg_id <= end_msg_id:
             try:
-
                 msg = await client.get_messages(chat_id, current_msg_id)
 
                 if msg and (msg.video or msg.document or msg.animation):
                     videos_queued += 1
-
                     await message_queue.put((client, msg))
 
                     if videos_queued % 10 == 0:
@@ -106,19 +101,19 @@ async def batch_process(client: Client, message: Message):
                             f"Current queue size: {current_queue_size}"
                         )
 
+                # Sleep for a random time between 30-60 seconds after processing each message
+                await asyncio.sleep(random.randint(30, 60))  # Sleep 30 to 60 seconds
+
                 if current_msg_id % 20 == 0:
                     await asyncio.sleep(1)
 
             except Exception as e:
-
                 if (
                     "MESSAGE_NOT_FOUND" in str(e)
                     or "message not found" in str(e).lower()
                 ):
-
                     pass
                 elif "FLOOD_WAIT" in str(e) or "flood wait" in str(e).lower():
-
                     wait_time = (
                         int(str(e).split(" ")[-1])
                         if str(e).split(" ")[-1].isdigit()
@@ -128,7 +123,6 @@ async def batch_process(client: Client, message: Message):
                         f"⏳ Rate limited. Waiting for {wait_time} seconds..."
                     )
                     await asyncio.sleep(wait_time)
-
                     continue
                 else:
                     LOGGER.error(f"Error processing message {current_msg_id}: {str(e)}")

@@ -12,7 +12,7 @@ async def auto_poster(client: Client, message: Message, content: dict, media_typ
         release_year = content['release_date'][:4] if content['release_date'] else ""
         
         caption_text = f"""
-`{content['title']}` `({release_year})` `{f"Season {content['season'][0]["season_number"]}" if media_type == "show" else ""} {f"Episode {content['season'][0]['episodes'][0]["episode_number"]}" if media_type == "show" else ""}`
+`{content['title']}` `({release_year})` `{f"Season {content['season'][0]['season_number']}" if media_type == "show" else ""} {f"Episode {content['season'][0]['episodes'][0]['episode_number']}" if media_type == "show" else ""}`
 **Quality :** `{content['season'][0]["episodes"][0]["quality"][0]["type"] if media_type == "show" else content["quality"][0]["type"]}`
 **Size :** `{content['season'][0]["episodes"][0]["quality"][0]["size"] if media_type == "show" else content["quality"][0]["size"]}`
 
